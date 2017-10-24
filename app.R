@@ -1,77 +1,49 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 #Naomi Breslin
 #17232617
-#26/10/17
+#24/10/17
+
 library(shiny)
-if (interactive()) {
-# Define UI for application that draws a histogram
+#defining fluidpage, input the title panel and the sidebar applications
 ui <- fluidPage(
-   
-   # Application title
-   titlePanel("Patient Data"),
-   sidebarLayout(
-     sidebarPanel(
-  #Adding side bar applications(inputs) to the app
-       #1:CSV file input, 2:A select input (based on the column names in the csv file) 3:Radio buttons
-          fileInput("file1", "Choose CSV File",
-                 accept = c(
-                   "text/csv",
-                   "text/comma-separated-values,text/plain",
-                   ".csv")
-       ),
-       tags$hr(),
-       checkboxInput("header", "Header", TRUE)
-     ,
-  
-  selectInput("var", "Select a variable:",
-              c("Age" = "age",
-                "Height" = "height",
-                "Weight" = "weight",
-                "Bmi" = "bmi")),
-  radioButtons("cols", "Colours", 
-               c("Red",
-                 "Blue",
-                 "Green",
-                 "Pink")))
-
-,
-mainPanel(
-        tableOutput("data"),
-        plotOutput("variables")
-        )))
-  
-
-server <- function(input, output){
-  #Rendering a table from the csv file data
-  output$data <-renderTable({ 
-    infile <-input$file1
-    if (is.null(infile))
-      return(NULL)
-    c <-read.csv(infile$datapath, header = input$header)
+  titlePanel("Probability Distribution"),
+  sidebarLayout(
+    sidebarPanel(
+      #A numeric input for the individual to choose the number of samples
+      numericInput("nums", "Choose the number of random samples:",
+                   min=0,
+                   max=500,
+                   value=50), 
+      #Two sliders for the mean and standard deviation
+      sliderInput("mean",
+                  "Choose the mean value:",
+                  min = 1,
+                  max = 100,
+                  value = 50),
     
-  })
-  #Using the select input and radio button inputs for boxplots
-  output$variables <-renderPlot({
-    (req(input$file1))
-    infile <- input$file1
-    data <-read.csv(infile$datapath, header=input$header)
-    var <-input$var
-    col <-input$cols
-    boxplot(data[,var], col=col, main=paste("Selected Variable", var))
-  })}
-    
- 
-  
+    sliderInput("sd",
+                "Choose the standard deviation value:",
+                min = 1,
+                max = 10,
+                value = 5)),
+  #Defining main panel with plot output with the name hist
+    mainPanel(
+    plotOutput(outputId = "hist"))))
 
+# Define server logic required to draw a histogram
+server <- function(input, output){ 
+   #rendering a plot based on the inputs using the plot ID defined under the main panel
+   output$hist <- renderPlot({
+     hist(rnorm(input$nums), 
+          main = 'Histogram displaying values', 
+          xlab = 'associated value', 
+          col = "white", border = "black")
+     
+     mean(mean(input$mean))
+     
+     sd(sd(input$sd))
+     
+   })}
 
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-}
